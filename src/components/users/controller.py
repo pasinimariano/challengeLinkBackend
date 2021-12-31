@@ -1,0 +1,54 @@
+from flask import request
+from .store import users
+
+
+def validate_username(username):
+    response = 'Success'
+
+    if len(username) < 3:
+        response = 'The name must be at least 3 characters'
+        return response
+
+    for user in users:
+        if username.lower() in user['username'].lower():
+            response = 'Username already exist'
+            break
+        else:
+            continue
+
+    return response
+
+
+def validate_email(email):
+    response = 'Success'
+
+    if not email:
+        response = 'Email is required'
+        return response
+
+    for user in users:
+        if email.lower() in user['email'].lower():
+            response = 'There is another user with that email'
+            break
+        else:
+            continue
+
+    return response
+
+
+def create_user(username, email):
+    username_validator = validate_username(username)
+    email_validator = validate_email(email)
+    bad_response = {
+        "username": username_validator,
+        "email": email_validator
+    }
+
+    if username_validator == 'Success' and email_validator == 'Success':
+        users.append({
+            'username': username,
+            'email': email
+        })
+        return f'{username.upper()} was created successfully'
+    else:
+        return bad_response
