@@ -3,6 +3,7 @@ from .controller import create_user
 
 
 def user_controller(server):
+
     @server.route('/createuser', methods=['POST'])
     def new_user():
         username = request.json['username']
@@ -12,3 +13,7 @@ def user_controller(server):
         response = create_user(username, email, password)
 
         return jsonify(response)
+
+    @server.route('/login', methods=['GET'])
+    def login():
+        return 'hello'
