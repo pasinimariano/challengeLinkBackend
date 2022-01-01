@@ -1,19 +1,20 @@
 from flask import request, jsonify
-from .controller import create_user
+from .controller import create_user, user_login
+from .functions.getData import get_data_body
 
 
-def user_controller(server):
+def user_controller(server, secret_key):
 
     @server.route('/createuser', methods=['POST'])
     def new_user():
-        username = request.json['username']
-        email = request.json['email']
-        password = request.json['password']
-
-        response = create_user(username, email, password)
+        body = get_data_body()
+        response = create_user(body['username'], body['email'], body['password'])
 
         return jsonify(response)
 
-    @server.route('/login', methods=['GET'])
+    @server.route('/login', methods=['POST'])
     def login():
-        return 'hello'
+        body = get_data_body()
+        response = user_login(body['username'], body['email'], body['password'], secret_key)
+
+        return jsonify(response)

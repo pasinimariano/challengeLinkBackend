@@ -18,7 +18,7 @@ class NewUser:
             return response
 
         for user in users:
-            if self.username.lower() in user['username'].lower():
+            if self.username.lower() == user['username'].lower():
                 response = 'Username already exist'
                 break
             else:
@@ -38,7 +38,7 @@ class NewUser:
             return response
 
         for user in users:
-            if self.email.lower() in user['email'].lower():
+            if self.email.lower() == user['email'].lower():
                 response = 'There is another user with that email'
                 break
             else:
