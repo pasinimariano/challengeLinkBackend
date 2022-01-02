@@ -1,20 +1,57 @@
-from flask import request, jsonify
-from .controller import create_user, user_login
+from flask import jsonify, make_response
+from .controller import create_user, user_login, api_token
 from .functions.getData import get_data_body
 
 
-def user_controller(server, secret_key):
+def user_controller(server):
 
-    @server.route('/createuser', methods=['POST'])
+    @server.route('/signup', methods=['POST'])
     def new_user():
         body = get_data_body()
-        response = create_user(body['username'], body['email'], body['password'])
-
-        return jsonify(response)
+        if not body:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm = "Some fields are incorrect or missing"'}
+            )
+        else:
+            response = create_user(body['username'], body['email'], body['password'])
+            if response[0] == 'Errors':
+                return make_response(
+                    jsonify(response),
+                    403,
+                    {'WWW-Authenticate': 'Basic realm ="Error occurred"'}
+                )
+            else:
+                return make_response(response, 200)
 
     @server.route('/login', methods=['POST'])
     def login():
         body = get_data_body()
-        response = user_login(body['username'], body['email'], body['password'], secret_key)
+        if not body:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm ="Some fields are incorrect or missing"'}
+            )
+        else:
+            response = user_login(body['username'], body['email'], body['password'])
+            if response == 'Invalid':
+                return make_response(
+                    'Could not verify',
+                    403,
+                    {'WWW-Authenticate': 'Basic realm = "User is invalid"'}
+                )
+            elif response == 'Incorrect':
+                return make_response(
+                    'Could not verify',
+                    403,
+                    {'WWW-Authenticate': 'Basic realm = "Incorrect password"'}
+                )
+            else:
+                return make_response(response, 200)
 
-        return jsonify(response)
+    @server.route('/canipass', methods=['GET', 'POST'])
+    @api_token
+    def authorized():
+        return make_response('True', 200)

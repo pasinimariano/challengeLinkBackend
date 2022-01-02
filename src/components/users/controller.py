@@ -1,9 +1,14 @@
 import uuid
 import jwt
+from dotenv import dotenv_values
+from functools import wraps
+from flask import request, make_response
 from datetime import datetime, timedelta
 from .store import users, NewUser
 from .functions.encripter import check_encrypted_password
 from .functions.getUser import get_user
+
+ENV = dotenv_values('.env')
 
 
 def create_user(username, email, password):
@@ -24,24 +29,58 @@ def create_user(username, email, password):
             "username": new_user.validate_username(),
             "email": new_user.validate_email()
         }
-        return bad_response
+        return ['Errors', bad_response]
 
 
-def user_login(username, email, password, secret_key):
+def user_login(username, email, password):
     user = get_user(username, email, users)
 
     if len(user) == 0:
-        return {'Error': f'User {username} not found'}
+        return 'Invalid'
     elif user[0]['password'] and check_encrypted_password(password, user[0]['password']):
-        token = jwt.encode({
-            'exp': datetime.utcnow() + timedelta(minutes=25),
-            'iat': datetime.utcnow(),
-            'sub': user[0]['username']
-        },
-            secret_key,
-            algorithm='HS256'
-        )
-
-        return {'Token': token}
+        try:
+            token = jwt.encode({
+                'exp': datetime.utcnow() + timedelta(minutes=25),
+                'iat': datetime.utcnow(),
+                'sub': user[0]['username']
+            },
+                ENV['SECRET_KEY'],
+                algorithm='HS256'
+            )
+            return {'Token': token}
+        except Exception as error:
+            return error
     else:
-        return {'Unable to verify, incorrect password', 403, {'WWW-Authenticate': 'Basic real:' "Authentication fails"}}
+        return 'Incorrect'
+
+
+def api_token(func):
+    @wraps(func)
+    def token_required(*args, **kwargs):
+        token = request.args.get('token')
+
+        if not token:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm = "Token is missing"'}
+            )
+
+        try:
+            jwt.decode(token, ENV['SECRET_KEY'], algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm = "Token expired, log in again"'}
+            )
+        except jwt.InvalidTokenError:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm = "Invalid token. Please log in again"'}
+            )
+
+        return func(*args, **kwargs)
+
+    return token_required
