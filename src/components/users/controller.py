@@ -66,6 +66,20 @@ def delete_user(user_data):
         return 'Incorrect'
 
 
+def update_user(user_data):
+    if user_data['username'] and user_data['email'] and user_data['password']:
+        user = [x for x in users if user_data['id'] == x['id']]
+
+        if len(user) == 0:
+            return 'Invalid'
+        else:
+            user_index = users.index(user[0])
+            users[user_index] = user_data
+            return "{name} has been updated".format(name=user[0]['username'])
+    else:
+        return 'Empty fields'
+
+
 def api_token(func):
     @wraps(func)
     def token_required(*args, **kwargs):
