@@ -1,5 +1,5 @@
 from flask import jsonify, make_response
-from .controller import create_user, user_login, api_token
+from .controller import create_user, user_login, api_token, delete_user
 from .functions.getData import get_data_body
 
 
@@ -35,7 +35,7 @@ def user_controller(server):
                 {'WWW-Authenticate': 'Basic realm ="Some fields are incorrect or missing"'}
             )
         else:
-            response = user_login(body['username'], body['email'], body['password'])
+            response = user_login(body)
             if response == 'Invalid':
                 return make_response(
                     'Could not verify',
@@ -55,3 +55,30 @@ def user_controller(server):
     @api_token
     def authorized():
         return make_response('True', 200)
+
+    @server.route('/delete', methods=['GET', 'POST'])
+    @api_token
+    def delete():
+        body = get_data_body()
+        if not body:
+            return make_response(
+                'Could not verify',
+                403,
+                {'WWW-Authenticate': 'Basic realm ="Some fields are incorrect or missing"'}
+            )
+        else:
+            response = delete_user(body)
+            if response == 'Invalid':
+                return make_response(
+                    'Could not verify',
+                    403,
+                    {'WWW-Authenticate': 'Basic realm = "User is invalid"'}
+                )
+            elif response == 'Incorrect':
+                return make_response(
+                    'Could not verify',
+                    403,
+                    {'WWW-Authenticate': 'Basic realm = "Incorrect password"'}
+                )
+            else:
+                return make_response(response, 200)

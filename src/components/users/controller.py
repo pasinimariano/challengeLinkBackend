@@ -32,12 +32,12 @@ def create_user(username, email, password):
         return ['Errors', bad_response]
 
 
-def user_login(username, email, password):
-    user = get_user(username, email, users)
-
+def user_login(user_data):
+    user = get_user(user_data, users)
+    print(users)
     if len(user) == 0:
         return 'Invalid'
-    elif user[0]['password'] and check_encrypted_password(password, user[0]['password']):
+    elif user[0]['password'] and check_encrypted_password(user_data['password'], user[0]['password']):
         try:
             token = jwt.encode({
                 'exp': datetime.utcnow() + timedelta(minutes=25),
@@ -50,6 +50,18 @@ def user_login(username, email, password):
             return {'Token': token}
         except Exception as error:
             return error
+    else:
+        return 'Incorrect'
+
+
+def delete_user(user_data):
+    user = get_user(user_data, users)
+
+    if len(user) == 0:
+        return 'Invalid'
+    elif len(user) != 0:
+        users.remove(user[0])
+        return "{name} has been deleted".format(name=user[0]['username'])
     else:
         return 'Incorrect'
 
