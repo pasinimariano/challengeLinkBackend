@@ -59,14 +59,13 @@ def delete_user(user_data):
 
     if len(user) == 0:
         return 'Invalid'
-    elif len(user) != 0:
+    else:
         users.remove(user[0])
         return "{name} has been deleted".format(name=user[0]['username'])
-    else:
-        return 'Incorrect'
 
 
 def update_user(user_data):
+    print("Antes",users)
     if user_data['username'] and user_data['email'] and user_data['password']:
         user = [x for x in users if user_data['id'] == x['id']]
 
@@ -75,9 +74,8 @@ def update_user(user_data):
         else:
             user_index = users.index(user[0])
             users[user_index] = user_data
+            print("Despues", users)
             return "{name} has been updated".format(name=user[0]['username'])
-    else:
-        return 'Empty fields'
 
 
 def api_token(func):

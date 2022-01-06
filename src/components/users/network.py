@@ -74,12 +74,6 @@ def user_controller(server):
                     403,
                     {'WWW-Authenticate': 'Basic realm = "User is invalid"'}
                 )
-            elif response == 'Incorrect':
-                return make_response(
-                    'Could not verify',
-                    403,
-                    {'WWW-Authenticate': 'Basic realm = "Incorrect password"'}
-                )
             else:
                 return make_response(response, 200)
 
@@ -100,12 +94,6 @@ def user_controller(server):
                     'Could not verify',
                     403,
                     {'WWW-Authenticate': 'Basic realm = "User is invalid"'}
-                )
-            elif response == 'Incorrect':
-                return make_response(
-                    'Could not verify',
-                    403,
-                    {'WWW-Authenticate': 'Basic realm = "Empty fields"'}
                 )
             else:
                 return make_response(response, 200)
