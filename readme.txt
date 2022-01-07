@@ -23,7 +23,6 @@ mencionado.
 El último paso a realizar será crear un nuevo archivo llamado ".env", donde se almacenarán todas las variables de entorno.
 Por el momento necesitamos tener:
 SECRET_KEY=my_secret_key
-PORT=my_port
 
 Con todos estos requisitos cumplidos la api funcionará correctamente.
 Para correr el proyecto, en una terminal, dentro del entorno virtual, utilizaremos el comando:
